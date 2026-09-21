@@ -143,7 +143,15 @@ router.get('/stream/:id', (req, res) => {
 })
 
 // GET /api/videos - list (supports ?title=)
-
+router.get('/', (req, res) => {
+  const { title } = req.query
+  let videos = readJSON(videosFile) || []
+  if (title) {
+    videos = videos.filter((v) => 
+      v.title.toLowerCase().includes(title.toLowerCase()))
+  }
+  res.json(videos)
+})
 
 // GET /api/videos/:id
 
