@@ -154,9 +154,41 @@ router.get('/', (req, res) => {
 })
 
 // GET /api/videos/:id
+router.get('/:id', (req, res) => {
+  const videos = readJSON(videosFile) || []
+  const video = videos.find((v) => v._id === req.params.id)
+
+  if (!video) {
+    return res.status(404).json({ error: 'Video not found' })
+  }
+
+  video.views = (video.views || 0) + 1
+  writeJSON(videosFile, videos)
+
+  res.json(video)
+})
 
 
 // PUT /api/videos/:id/like  { like: true }
+router.put('/:id/like', (req, res) => {
+  const videos = readJSON(videosFile) || []
+  const video = videos.find((v) => v._id === req.params.id)
+
+  if (!video) {
+    return res.status(404).json({ error: 'Video not found' })
+  }
+
+  if (req.body.like === true) {
+    video.likes = (video.likes || 0) + 1
+  } else if (req.body.like === false) {
+    video.likes = Math.max((video.likes || 0) - 1, 0)
+  } else {
+    return res.status(400).json({ error: 'like must be true or false' })
+  }
+
+  writeJSON(videosFile, videos)
+  res.json({ videoId: video._id, likes: video.likes })
+})
 
 
 // PUT /api/videos/:id/comments  { author, text }
