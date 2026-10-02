@@ -10,7 +10,6 @@ function App() {
   const [videos, setVideos] = useState([]);
   const [currentVideo, setCurrentVideo] = useState(null);
   const [history, setHistory] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
 
   const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:4000/api';
@@ -113,7 +112,6 @@ function App() {
 
   // Handle search
   const handleSearch = (query) => {
-    setSearchQuery(query);
     if (query.length >= 2 || query.length === 0) {
       fetchVideos(query);
     }
@@ -123,8 +121,8 @@ function App() {
   useEffect(() => {
     fetchVideos();
     fetchHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   return (
     <div className="app">
       <Header onSearch={handleSearch} />
