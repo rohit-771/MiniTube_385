@@ -191,23 +191,98 @@ router.put('/:id/like', (req, res) => {
 })
 
 
-// PUT /api/videos/:id/comments  { author, text }
+/ PUT /api/videos/:id/comments  { author, text }
+router.put('/:id/comments', (req, res) => {
+  const videos = readJSON(videosFile) || []
+  const video = videos.find((v) => v._id === req.params.id)
 
+  if (!video) {
+    return res.status(404).json({ error: 'Video not found' })
+  }
+
+  const { author, text } = req.body
+
+  if (!text || !text.trim()) {
+    return res.status(400).json({ error: 'Comment text is required' })
+  }
+
+  const comment = {
+    _id: generateId(),
+    author: author || 'Anonymous',
+    text: text.trim(),
+    createdAt: new Date().toISOString()
+  }
+
+  if (!video.comments) {
+    video.comments = []
+  }
+
+  video.comments.push(comment)
+  writeJSON(videosFile, videos)
+
+  res.status(201).json(video.comments)
+})
 
 // GET /api/videos/:id/likes
+router.get('/:id/likes', (req, res) => {
+  const videos = readJSON(videosFile) || []
+  const video = videos.find((v) => v._id === req.params.id)
 
+  if (!video) {
+    return res.status(404).json({ error: 'Video not found' })
+  }
+
+  res.json({ videoId: video._id, likes: video.likes || 0 })
+})
 
 // GET /api/videos/:id/comments
+router.get('/:id/comments', (req, res) => {
+  const videos = readJSON(videosFile) || []
+  const video = videos.find((v) => v._id === req.params.id)
 
+  if (!video) {
+    return res.status(404).json({ error: 'Video not found' })
+  }
+
+  res.json(video.comments || [])
+})
 
 // GET /api/videos/watch-history — Get watch history
+router.get('/watch-history', (req, res) => {
+  const history = readHistory()
 
+  history.sort((a, b) =>
+    new Date(b.watchedAt) - new Date(a.watchedAt)
+  )
+
+  res.json(history)
+})
 
 // POST /api/videos/watch-history — Add to history
+router.post('/watch-history', (req, res) => {
+  const { videoId } = req.body
+  const videos = readJSON(videosFile) || []
+  const video = videos.find((v) => v._id === videoId)
 
+  if (!video) {
+    return res.status(404).json({ error: 'Video not found' })
+  }
+
+  const history = readHistory()
+
+  history.push({
+    videoId,
+    watchedAt: new Date().toISOString()
+  })
+
+  writeHistory(history)
+  res.status(201).json({ message: 'Added to history' })
+})
 
 // DELETE /api/videos/watch-history — Clear history
-
-
+router.delete('/watch-history', (req, res) => {
+  writeHistory([])
+  res.json({ message: 'Watch history cleared' })
+})
 
 module.exports = router
