@@ -191,7 +191,7 @@ router.put('/:id/like', (req, res) => {
 })
 
 
-/ PUT /api/videos/:id/comments  { author, text }
+// PUT /api/videos/:id/comments 
 router.put('/:id/comments', (req, res) => {
   const videos = readJSON(videosFile) || []
   const video = videos.find((v) => v._id === req.params.id)
